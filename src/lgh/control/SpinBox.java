@@ -1,3 +1,4 @@
+package lgh.control;
 import java.awt.AWTException;
 import java.awt.Robot;
 
@@ -23,9 +24,14 @@ public class SpinBox extends HBox{
 	CustomTF valTf = new CustomTF();
 	CustomTF stpTf = new CustomTF();
 	CustomTF facTf = new CustomTF();
-	boolean swi = true;
+	boolean swi = false;
 	public SpinBox(){
+		this(0);
+	}
+	public SpinBox(double val){
 		super();
+		HBox.setHgrow(this, Priority.ALWAYS);
+		valTf.val.set(val);
 		valTf.steplen.bindBidirectional(stpTf.val);
 		valTf.factor.bindBidirectional(facTf.val);
 		stpTf.val.set(1.0);
@@ -34,13 +40,13 @@ public class SpinBox extends HBox{
 		stpTf.prefWidthProperty().bind(this.widthProperty().multiply(0.2));
 		facTf.prefWidthProperty().bind(this.widthProperty().multiply(0.2));
 		
-		valTf.setStyle("-fx-background-color: #999999;-fx-background-radius: 20px 0 0 20px;"
-				+ "-fx-border-color: black; -fx-border-radius: 20px 0 0 20px;");
+		valTf.setStyle("-fx-background-color: #999999;-fx-background-radius: 20px 20px 20px 20px;"
+				+ "-fx-border-color: black; -fx-border-radius: 20px 20px 20px 20px;");
 		stpTf.setStyle("-fx-background-color: #999999;"
 				+ "-fx-border-color: black;");
 		facTf.setStyle("-fx-background-color: #999999;-fx-background-radius: 0 20px 20px 0;"
 				+ "-fx-border-color: black; -fx-border-radius: 0 20px 20px 0;");
-		this.getChildren().addAll(valTf, stpTf, facTf);
+		this.getChildren().addAll(valTf);
 		HBox.setHgrow(valTf, Priority.ALWAYS);
 		this.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
 			if(e.getButton().equals(MouseButton.SECONDARY)){
@@ -66,6 +72,19 @@ public class SpinBox extends HBox{
 		valTf.val.set(val);
 	}
 	
+	public void setRange(double min, double max){
+		this.setMin(min);
+		this.setMax(max);
+	}
+	
+	public void setMin(double min){
+		valTf.min = min;
+	}
+	
+	public void setMax(double max){
+		valTf.max = max;
+	}
+	
 	class CustomTF extends TextField{
 		SimpleDoubleProperty val = new SimpleDoubleProperty(0);
 		SimpleDoubleProperty steplen = new SimpleDoubleProperty(1);
@@ -73,6 +92,8 @@ public class SpinBox extends HBox{
 		Double lastX = null;
 		Double lastY = null;
 		Double lastVal = null;
+		double min = -10000;
+		double max = 10000;
 		public CustomTF(){
 			this.setText(String.valueOf(val.get()));
 			val.addListener(e -> {
@@ -185,10 +206,15 @@ public class SpinBox extends HBox{
 		public void valInc(){
 			steplen.set(steplen.get() * factor.get());
 			val.set(val.get() + steplen.get());
+			if(val.get()>max)val.set(max);
+			if(val.get()<min)val.set(min);
 		}
 		public void valDec(){
 			steplen.set(steplen.get() * factor.get());
 			val.set(val.get() - steplen.get());
+			if(val.get()>max)val.set(max);
+			if(val.get()<min)val.set(min);
 		}
+		
 	}
 }
